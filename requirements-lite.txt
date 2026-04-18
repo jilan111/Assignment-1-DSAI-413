@@ -1,0 +1,19 @@
+# Core
+streamlit>=1.32.0
+openai>=1.14.0
+
+# PDF processing
+pdfplumber>=0.10.3
+pypdf>=4.1.0
+
+# Embeddings & retrieval (using sklearn TF-IDF instead of transformers/torch)
+faiss-cpu>=1.8.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+
+# PDF report generation
+reportlab>=4.1.0
+
+# Utilities
+python-dotenv>=1.0.0
+Pillow>=10.2.0
