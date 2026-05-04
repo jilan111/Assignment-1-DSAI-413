@@ -1,180 +1,118 @@
-# ✦ DocMind — Multi-Modal RAG QA System
+# DocMind — Multi-Modal RAG QA System
 
-> Upload any PDF. Ask anything. Get cited answers.
+Upload any PDF. Ask anything. Get answers with page citations.
 
-A production-ready, multi-modal Retrieval-Augmented Generation (RAG) system with a beautiful feminine UI built on Streamlit. Works with **any** OpenAI-compatible LLM API.
+DocMind is a Retrieval-Augmented Generation (RAG) system that extracts text, tables, and image captions from PDF documents and answers natural-language queries with traceable source citations. It runs on any OpenAI-compatible LLM backend (OpenAI, Groq, Together, Ollama).
 
----
-
-## 🏗️ Architecture
-
-```
-PDF Upload
-    │
-    ▼
-┌─────────────────────────────────────────────────────────┐
-│  INGESTION  (ingestion/pdf_extractor.py)                │
-│  Text + Tables + Image captions via pdfplumber          │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│  CHUNKING  (processing/chunker.py)                      │
-│  Semantic + structural splitting with overlap           │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│  EMBEDDINGS + VECTOR STORE  (retrieval/vector_store.py) │
-│  sentence-transformers → FAISS  (TF-IDF fallback)       │
-└────────────────────────┬────────────────────────────────┘
-                         │  top-k retrieval
-                         ▼
-┌─────────────────────────────────────────────────────────┐
-│  QA GENERATION  (qa/qa_engine.py)                       │
-│  LLM synthesizes answer + (Source: Page N) citations    │
-└─────────────────────────────────────────────────────────┘
-```
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![Streamlit](https://img.shields.io/badge/UI-Streamlit-red)
+![FAISS](https://img.shields.io/badge/vector_store-FAISS-green)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ---
 
-## ⚡ Quick Start
+## Demo
 
-### 1. Clone / extract the project
-```bash
-cd multimodal_rag
+> _Add a screenshot or 30-second GIF of the Streamlit UI here (`docs/demo.gif`)._
+
+---
+
+## Features
+
+- **Multi-modal extraction** — text, tables, and image captions parsed from PDFs via pdfplumber
+- **Semantic + structural chunking** with configurable overlap
+- **Vector retrieval** — FAISS embeddings (sentence-transformers), with TF-IDF fallback when GPU/embeddings are unavailable
+- **Cited answers** — every response includes the source page numbers
+- **Pluggable LLM** — works with any OpenAI-compatible API
+- **Built-in evaluation** harness with sample queries
+
+---
+
+## Architecture
+
+```
+PDF ──▶ Ingestion ──▶ Chunking ──▶ Embeddings ──▶ FAISS Index
+                                                       │
+                                                       ▼
+User Query ──▶ Retrieval ──▶ LLM (with context) ──▶ Cited Answer
 ```
 
-### 2. Create a virtual environment
-```bash
-python -m venv .venv
-source .venv/bin/activate        # Linux / macOS
-.venv\Scripts\activate           # Windows
-```
+---
 
-### 3. Install dependencies
+## Quick start
+
 ```bash
+git clone https://github.com/jilan111/DocMind.git
+cd DocMind
 pip install -r requirements.txt
-```
 
-### 4. Add your API key
+# Configure your LLM
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://api.openai.com/v1   # or Groq, Ollama, etc.
 
-**Option A — Environment variable (recommended):**
-```bash
-cp .env.example .env
-# Edit .env and set LLM_API_KEY=sk-your-key-here
-```
-
-**Option B — UI sidebar:**  
-Enter the key directly in the app sidebar. No restart needed.
-
-### 5. Run the app
-```bash
 streamlit run app.py
 ```
 
-The app opens at **http://localhost:8501**
+Lightweight install (TF-IDF fallback, no GPU embeddings):
 
----
-
-## 🔑 API Configuration
-
-The system supports **any OpenAI-compatible API**. Change the base URL in the sidebar:
-
-| Provider | Base URL |
-|----------|----------|
-| OpenAI   | `https://api.openai.com/v1` |
-| Groq     | `https://api.groq.com/openai/v1` |
-| Together | `https://api.together.xyz/v1` |
-| Ollama   | `http://localhost:11434/v1` |
-
----
-
-## 📄 Usage
-
-1. Open the app in your browser
-2. Enter your **API key** in the left sidebar and click **Save API Settings**
-3. Click **Browse files** to upload a PDF (drag & drop supported)
-4. Click **⚡ Process Document** — the system indexes the document
-5. Type any question in the chat box and press **Send ✦**
-6. Answers appear with **gold citation badges** showing the source page
-
----
-
-## 💬 Example Queries
-
-```
-"What is the main objective of this document?"
-"Summarize the key findings."
-"Are there any tables? What do they contain?"
-"What methodology is described?"
-"List any recommendations or future work."
+```bash
+pip install -r requirements-lite.txt
 ```
 
 ---
 
-## 📁 Project Structure
+## Project structure
 
 ```
 multimodal_rag/
-├── app.py                    # Streamlit application (entry point)
-├── requirements.txt
-├── .env.example
-├── README.md
-│
+├── app.py                    # Streamlit entry point
 ├── ingestion/
 │   └── pdf_extractor.py      # Multi-modal PDF extraction
-│
 ├── processing/
-│   └── chunker.py            # Semantic + structural chunking
-│
+│   └── chunker.py            # Semantic & structural chunking
 ├── retrieval/
-│   └── vector_store.py       # FAISS / TF-IDF vector store
-│
+│   └── vector_store.py       # FAISS / TF-IDF
 ├── qa/
 │   └── qa_engine.py          # LLM QA with citations
-│
 ├── utils/
-│   └── llm_client.py         # Generic LLM abstraction layer
-│
+│   └── llm_client.py         # LLM abstraction
 ├── evaluation/
-│   └── eval_queries.py       # 5 example queries + evaluator
-│
-├── report/
-│   ├── report.pdf            # Technical report (2 pages)
-│   └── generate_report.py
-│
-├── demo/
-│   └── demo_script_ar.txt    # Egyptian Arabic demo script
-│
-└── data/                     # Place test PDFs here
+│   └── eval_queries.py       # Sample queries + evaluator
+├── data/                     # Test PDFs
+└── report/                   # Technical documentation
 ```
 
 ---
 
-## 🛠️ Troubleshooting
+## Tech stack
 
-| Problem | Solution |
-|---------|----------|
-| `Invalid API key` | Double-check your key in the sidebar. Make sure no extra spaces. |
-| `API unavailable` | Check your internet connection or provider status. |
-| Slow processing | Large PDFs take more time. Use the top-k slider to reduce retrieval. |
-| `No relevant content found` | Try rephrasing your question, or reduce top-k to 2–3. |
-| Encoding errors | The app enforces UTF-8 everywhere. Restart with `streamlit run app.py`. |
-| FAISS not installing | The system auto-falls back to TF-IDF. No action needed. |
-
----
-
-## 🧪 Running Evaluations
-
-```python
-# In a Python shell after processing a document:
-from evaluation.eval_queries import run_evaluation
-results = run_evaluation(vector_store, llm_client, verbose=True)
-```
+| Layer | Tool |
+|-------|------|
+| UI | Streamlit |
+| PDF parsing | pdfplumber |
+| Embeddings | sentence-transformers |
+| Vector store | FAISS (TF-IDF fallback) |
+| LLM | OpenAI-compatible API |
+| Language | Python 3.10+ |
 
 ---
 
-## 📜 License
+## Roadmap
 
-For academic submission purposes only.
+- [ ] Async ingestion for large PDFs
+- [ ] Hybrid (BM25 + dense) retrieval
+- [ ] Re-ranker stage
+- [ ] Persistent index across sessions
+- [ ] Dockerfile + one-command deploy
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+## Author
+
+Built by **Jilan Ismail** — [GitHub](https://github.com/jilan111) · [LinkedIn](https://www.linkedin.com/in/jilan-ismail-596b2b2b2/)

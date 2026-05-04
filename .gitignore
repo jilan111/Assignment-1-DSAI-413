@@ -1,9 +1,3 @@
-# Virtual environments
-.venv/
-venv/
-env/
-*/venv/
-
 # Python
 __pycache__/
 *.py[cod]
@@ -11,45 +5,51 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
+.eggs/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+.env.*
+*.env
+secrets.json
+.streamlit/secrets.toml
+
+# Jupyter
+.ipynb_checkpoints/
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Environment variables
-.env
-.env.local
+# Project artifacts
+data/*.pdf
+!data/.gitkeep
+faiss_index/
+*.faiss
+*.pkl
+*.bin
+embeddings_cache/
 
-# Cache
-.streamlit/
+# Logs
+*.log
+logs/
+
+# Coverage / test
+.coverage
+htmlcov/
 .pytest_cache/
-
-# Data
-data/
-*.pdf
+.tox/
